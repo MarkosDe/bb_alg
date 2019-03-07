@@ -150,11 +150,6 @@ def multiset.mon_LCM (m1 m2 : multiset σ) :=
 #check multiset.mon_LCM
 #eval multiset.mon_LCM _ ({3,3,2} : multiset ℕ) ({2,2, 8} : multiset ℕ)
 
-
-
-
-
-
 def ppp: my_mvpolynomial ℕ ℚ :=
   finsupp.single {3,3} 1 -  
   finsupp.single {2} 1
