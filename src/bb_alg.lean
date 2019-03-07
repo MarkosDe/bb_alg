@@ -12,7 +12,7 @@ variables {σ : Type*} [decidable_linear_order σ]
 def multiset.lex (m1 m2 : multiset σ) : Prop :=
   m1.sort (≤) ≤ m2.sort (≤)
 
-  instance (m1 m2 : multiset σ) : decidable (multiset.lex m1 m2) := by unfold multiset.lex; apply_instance
+instance (m1 m2 : multiset σ) : decidable (multiset.lex m1 m2) := by unfold multiset.lex; apply_instance
 
 example : linear_order (list σ) := by apply_instance
 
@@ -123,14 +123,14 @@ end
 def my_mvpolynomial.l_t (pol: my_mvpolynomial σ α ) : my_mvpolynomial σ α :=
   finsupp.single (my_mvpolynomial.leading_mon _ _ pol).iget (my_mvpolynomial.leading_coef _ _ pol) 
 
---representation of the palynomial
+--representation of the polynomial
 def my_mvpolynomial.repr [has_repr σ] [has_repr α] (p : my_mvpolynomial σ α) : string :=
   if p = 0 then "0" else ((finsupp.support p).sort multiset.lex).foldr 
-  --(λ s ms, s ++ "+" ++ ((ms).sort (≤)).foldl (λ s2 s1, s2 ++ repr s1 ++ ",") "") ""
-    (λ ms s, s ++ repr (p.to_fun ms)  ++ repr ms ++ if (p.to_fun ms) ≥ 0 then  " + " else " ") ""
+  (λ ms s, let coef := p.to_fun ms in 
+  s ++ (if (coef ≥ 0 ∧ s.length > 0) then " +" ++ repr coef else " " ++ repr coef) ++ repr ms ) ""
 
 instance [has_repr σ] [has_repr α] : has_repr (my_mvpolynomial σ α) :=
- ⟨my_mvpolynomial.repr α σ⟩
+  ⟨my_mvpolynomial.repr α σ⟩
 
 #check polt1.l_t _ _
 #check multiset.lex (my_mvpolynomial.leading_mon _ _ (polt1.l_t _ _)).iget (my_mvpolynomial.leading_mon _ _ (polt2.l_t _ _)).iget
@@ -157,7 +157,6 @@ def ppp: my_mvpolynomial ℕ ℚ :=
 def ppp2: my_mvpolynomial ℕ ℚ :=
   finsupp.single {3,3,3} 1 -  
   finsupp.single {1} 1
-
 
 --ok
 --LCM(LM1, LM2) / LM1
@@ -245,15 +244,10 @@ end
 #check (finsupp.support pol).sort multiset.lex
 #check divide_witness_pol _ _ pol pol
 
-
 -- n/d, q = 0, r = n, 
 --while divides tt, t = (C(r) / LC(d)) * (M(r) / LM(d))
 --              q = q + t, 
 --              r = r - t * d  
-
--- def find_pol_t (pol_r pol_d: my_mvpolynomial σ α) : my_mvpolynomial σ α :=
---   finsupp.single ((divide_witness _ _ pol_d pol_r).iget - (my_mvpolynomial.leading_mon _ _ pol_d).iget) 
---   ((divide_witness_pol _ _ pol_d pol_r).coef _ _ (divide_witness _ _ pol_d pol_r).iget / my_mvpolynomial.leading_coef _ _ pol_d)
 
 def find_pol_t (pol_r pol_d: my_mvpolynomial σ α) : my_mvpolynomial σ α :=
   let dw := (divide_witness _ _ pol_d pol_r).iget in 
@@ -339,7 +333,7 @@ meta def bb_alg (my_ideal: list (my_mvpolynomial σ α)) (h: my_ideal ≠ zero_i
 --#check @bb_alg'
 
 
-------------------------------- cannot ------------------
+----------------------------------------------- cannot -------------------------------------------------
 -- meta example (basis : list (my_mvpolynomial σ α)) : bb_criterion α σ (bb_alg' α σ (basis)) = tt :=
 -- begin
 --   simp*
@@ -401,5 +395,4 @@ def denom: my_mvpolynomial ℕ ℚ :=
   finsupp.single {1,1} 1 -  
   finsupp.single {1} 2 + 1
 
-  
 #eval long_div _ _ nom [denom]
