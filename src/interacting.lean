@@ -33,5 +33,6 @@ section
     end
 end
 
+#eval list.insert 8 [5,9]
 --instace ?
 --attribute ?

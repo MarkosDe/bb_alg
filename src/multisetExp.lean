@@ -75,3 +75,32 @@ def lookmap (f : α → option α) : list α → list α
   | some b := b :: l
   | none   := a :: lookmap l
   end
+
+
+--want to divide n with 2 v times
+def suca: nat -> nat -> nat
+ | n v := if v ≤ 1 then n/2 else suca (n/2) v-1
+
+#eval suca 8
+
+def crit (basis: list (nat)) : bool := 
+  ∀ x ∈ basis, ∀ y ∈ basis, x ≠ y -> x = 2 * y ∨ x = y / 2
+#eval crit [8,4]
+
+--if any number / any number = 3, then add 1
+--l l' is a list, n m is a nat
+def suca' (lis: list ℕ) : list ℕ :=
+  lis.foldl (λ l n, lis.foldl (λ l' m, if m / n = 3 then 1::l' else l') l) lis
+#eval suca' [6, 18]
+
+def suca'' (lis: list ℕ) : list ℕ :=
+  lis.foldl (λ l n, lis.foldl (λ l' m, let ninios:= m/n in if ninios = 3 then if (1 ∉ l' ∧ 0 ∉ l') then 1::l' else l' else l') l) lis
+#eval suca'' [6,18,2, 3, 9,0]
+
+def sucami: (list ℕ) -> (list ℕ)
+| [] := []
+| (h::t) :=
+  let F:= list.take(list.length (h::t)) (h::t) in
+   F.foldl (λ l n, F.foldl (λ l' m, if m / n = 3 then if (1 ∉ l' ∧ 0 ∉ l') then 1::l' else l' else l') l) F
+
+#eval sucami [6,18,2, 3, 9,0]
