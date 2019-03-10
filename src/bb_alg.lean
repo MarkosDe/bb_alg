@@ -10,7 +10,7 @@ variables {σ : Type*} [decidable_linear_order σ]
 
 -- '.sort' makes list
 def multiset.lex (m1 m2 : multiset σ) : Prop :=
-  m1.sort (≤) ≤ m2.sort (≤)
+  m1.sort (≥) ≤ m2.sort (≥)
 
 instance (m1 m2 : multiset σ) : decidable (multiset.lex m1 m2) := by unfold multiset.lex; apply_instance
 
@@ -18,7 +18,7 @@ example : linear_order (list σ) := by apply_instance
 
 #check @multiset.mem_sort
 
-lemma multiset.sort_ext {m1 m2 : multiset σ} : m1 = m2 ↔ m1.sort(≤) = m2.sort(≤) :=
+lemma multiset.sort_ext {m1 m2 : multiset σ} : m1 = m2 ↔ m1.sort(≥) = m2.sort(≥) :=
 iff.intro
   (sorry) 
   (assume h,
@@ -36,15 +36,8 @@ end
 
 local attribute [instance, priority 10000] multiset.lex_is_total
 
--- def drle (σ : Type) [decidable_linear_order σ] :  
---   decidable_rel (multiset.lex : multiset σ → multiset σ → Prop) :=
--- begin
---   intros a b,
---   apply_instance
--- end
-
 example (σ) [decidable_linear_order σ]: 
-∀ a b : σ , decidable (a ≤ b) :=--decidable_rel ((≤) : multiset σ → multiset σ → Prop) :=
+∀ a b : σ , decidable (a ≤ b) :=
  by apply_instance 
 
 #check @multiset.lex_is_total
@@ -88,11 +81,8 @@ variable (pol: my_mvpolynomial σ α)
 def monomial_degree (ms: multiset σ) : ℕ :=
   multiset.card ms
 
-def my_mvpolynomial.leading_mon (pol: my_mvpolynomial σ α ) := (finsupp.support pol).max
--- def my_mvpolynomial.leading_mon (pol: my_mvpolynomial σ α ):multiset σ:= 
---   match (my_mvpolynomial σ α) with
---   | some pol := (finsupp.support pol).max
---   | none := 0
+def my_mvpolynomial.leading_mon (pol: my_mvpolynomial σ α ) := 
+  (finsupp.support pol).max
 
 def degree_LM (pol: my_mvpolynomial σ α) : ℕ := 
   monomial_degree σ ((my_mvpolynomial.leading_mon α σ pol).iget)
@@ -101,15 +91,8 @@ def is_zero (pol : my_mvpolynomial σ α) : bool :=
   pol = 0
 
 def zero_ideal := ([0]: list (my_mvpolynomial σ α)) 
-#check zero_ideal α σ 
-variables (polt1 polt2: my_mvpolynomial σ α)
-#check monomial_degree
-#check ((my_mvpolynomial.leading_mon _ _ polt1).iget)
-#check @my_mvpolynomial.leading_mon
-#check my_mvpolynomial.leading_mon _ _ polt1
 
-#check @my_mvpolynomial.coef
-#check @option.iget
+variables (polt1 polt2: my_mvpolynomial σ α)
 
 --def my_mvpolynomial.leading_coef := pol.coef _ _ (leading_mon _ _ pol).iget
 def my_mvpolynomial.leading_coef (pol: my_mvpolynomial σ α ): α :=
@@ -123,7 +106,7 @@ end
 def my_mvpolynomial.l_t (pol: my_mvpolynomial σ α ) : my_mvpolynomial σ α :=
   finsupp.single (my_mvpolynomial.leading_mon _ _ pol).iget (my_mvpolynomial.leading_coef _ _ pol) 
 
---representation of the polynomial
+--Representation of the polynomial
 def my_mvpolynomial.repr [has_repr σ] [has_repr α] (p : my_mvpolynomial σ α) : string :=
   if p = 0 then "0" else ((finsupp.support p).sort multiset.lex).foldr 
   (λ ms s, let coef := p.to_fun ms in 
@@ -131,10 +114,6 @@ def my_mvpolynomial.repr [has_repr σ] [has_repr α] (p : my_mvpolynomial σ α)
 
 instance [has_repr σ] [has_repr α] : has_repr (my_mvpolynomial σ α) :=
   ⟨my_mvpolynomial.repr α σ⟩
-
-#check polt1.l_t _ _
-#check multiset.lex (my_mvpolynomial.leading_mon _ _ (polt1.l_t _ _)).iget (my_mvpolynomial.leading_mon _ _ (polt2.l_t _ _)).iget
-#check (my_mvpolynomial.leading_mon _ _ (polt1.l_t _ _)).iget
 
 --used in for LCM of monomials 
 def multiset.add_repeats (ms: multiset σ) (aa : σ) (n: nat) := (multiset.repeat aa n) + ms
@@ -150,13 +129,49 @@ def multiset.mon_LCM (m1 m2 : multiset σ) :=
 #check multiset.mon_LCM
 #eval multiset.mon_LCM _ ({3,3,2} : multiset ℕ) ({2,2, 8} : multiset ℕ)
 
-def ppp: my_mvpolynomial ℕ ℚ :=
+def f1: my_mvpolynomial ℕ ℚ :=
+  finsupp.single {3,3,2} 1 -  
+  finsupp.single {} 1
+
+def f2: my_mvpolynomial ℕ ℚ :=
+  finsupp.single {3,2,2} 1 -  
+  finsupp.single {3} 1
+
+def f3: my_mvpolynomial ℕ ℚ :=
   finsupp.single {3,3} 1 -  
   finsupp.single {2} 1
 
-def ppp2: my_mvpolynomial ℕ ℚ :=
-  finsupp.single {3,3,3} 1 -  
-  finsupp.single {1} 1
+def f4: my_mvpolynomial ℕ ℚ :=
+  finsupp.single {2,2} 1 -  
+  finsupp.single {} 1
+
+def w1: my_mvpolynomial ℕ ℚ :=
+  finsupp.single {2} 1 -  
+  finsupp.single {3,3} 1
+
+  def w2: my_mvpolynomial ℕ ℚ :=
+  finsupp.single {2,2} (-1) -  
+  finsupp.single {} 1
+
+  def w3: my_mvpolynomial ℕ ℚ :=
+  finsupp.single {3,3} (-1) +  
+  finsupp.single {2} 1
+
+  def g1: my_mvpolynomial ℕ ℚ :=
+  finsupp.single {3,3} 1 +  
+  finsupp.single {3,2,2} 1
+
+  def g2: my_mvpolynomial ℕ ℚ :=
+  finsupp.single {3,3} 1 -  
+  finsupp.single {2,2,2} 1
+
+  def g3: my_mvpolynomial ℕ ℚ :=
+  finsupp.single {2,2,2} 1 -  
+  finsupp.single {2,2} 1
+
+  def g4: my_mvpolynomial ℕ ℚ :=
+  finsupp.single {3,2,2} 1 +  
+  finsupp.single {2,2} 1
 
 --ok
 --LCM(LM1, LM2) / LM1
@@ -164,34 +179,49 @@ def s_monomial_l (pol1 pol2: my_mvpolynomial σ α): multiset σ :=
   let lmp1 := (my_mvpolynomial.leading_mon _ _ pol1).iget in 
   (multiset.mon_LCM _ lmp1 (my_mvpolynomial.leading_mon _ _ pol2).iget) - lmp1
 
-#eval s_monomial_l _ _ ppp ppp2
+#eval s_monomial_l _ _ f1 f2
+#eval s_monomial_l _ _ f1 f3
+#eval s_monomial_l _ _ f2 f3
 
 --LCM(LM1, LM2) / LM2
+-- def s_monomial_r (pol1 pol2: my_mvpolynomial σ α): multiset σ :=
+-- let lmp2 := (my_mvpolynomial.leading_mon _ _ pol2).iget in 
+--   (multiset.mon_LCM _ (my_mvpolynomial.leading_mon _ _ pol1).iget lmp2) - lmp2
 def s_monomial_r (pol1 pol2: my_mvpolynomial σ α): multiset σ :=
 let lmp2 := (my_mvpolynomial.leading_mon _ _ pol2).iget in 
   (multiset.mon_LCM _ (my_mvpolynomial.leading_mon _ _ pol1).iget lmp2) - lmp2
 
-#eval s_monomial_r _ _ ppp ppp2
+#eval my_mvpolynomial.leading_mon _ _ f2
+#eval multiset.mon_LCM _ (my_mvpolynomial.leading_mon _ _ f1).iget (my_mvpolynomial.leading_mon _ _ f2).iget
+#eval s_monomial_r _ _ f1 f2
+#eval s_monomial_r _ _ f1 f3
+#eval s_monomial_r _ _ f2 f3
 
 --(LCM(LM1, LM2) / LT1) * 1
 def s_polynomial_l (pol1 pol2: my_mvpolynomial σ α) : my_mvpolynomial σ α := 
   --(take monomaial and coef and make poly) * pol1
   (finsupp.single (s_monomial_l _ _ pol1 pol2) (1 / (my_mvpolynomial.leading_coef _ _ pol1))) * pol1
 
-#eval s_polynomial_l _ _ ppp ppp2
+#eval s_polynomial_l _ _ f1 f2
+#eval s_polynomial_l _ _ f1 f3
+#eval s_polynomial_l _ _ f2 f3
 
 --(LCM(LM1, LM2) / LT2) * 2
 def s_polynomial_r (pol1 pol2: my_mvpolynomial σ α) : my_mvpolynomial σ α := 
   (finsupp.single (s_monomial_r _ _ pol1 pol2) (1 / (my_mvpolynomial.leading_coef _ _ pol2))) * pol2
 
-#eval s_polynomial_r _ _ ppp ppp2
+#eval s_polynomial_r _ _ f1 f2
+#eval s_polynomial_r _ _ f1 f3
+#eval s_polynomial_r _ _ f2 f3
 
 -- S-Pol
 -- S(pol1,pol2) = s_polynomial_l - s_polynomial_r
 def s_polynomial (pol1 pol2: my_mvpolynomial σ α) : my_mvpolynomial σ α :=
   (s_polynomial_l _ _ pol1 pol2) - (s_polynomial_r _ _ pol1 pol2)
 
-#eval s_polynomial _ _ ppp ppp2
+#eval s_polynomial _ _ f1 f2
+#eval s_polynomial _ _ f1 f3
+#eval s_polynomial _ _ f2 f3
 
 --what is in denom must be contained also in num
 def divides' (ms1 ms2 : multiset ℕ) : bool := 
@@ -275,12 +305,22 @@ def find_new_r (pol_r pol_d: my_mvpolynomial σ α) : my_mvpolynomial σ α :=
 
 -- divide a pol with list of pols
 -- must assume list is ordered
-meta def long_div: my_mvpolynomial _ _ -> list (my_mvpolynomial _ _) -> my_mvpolynomial σ α
+meta def long_div: my_mvpolynomial σ α -> list (my_mvpolynomial σ α) -> my_mvpolynomial σ α
   | pol_n (h::t) := if (divide_witness α σ h pol_n) = none then long_div pol_n t else
     long_div (find_new_r α σ pol_n h) (h::t)
   | pol_n [] := pol_n
 
 #check long_div α σ pol [pol,pol]
+#eval long_div _ _ (s_polynomial _ _ f1 f2) [f1,f2]
+#eval long_div _ _ (s_polynomial _ _ f2 f2) [f1,f2,f3,f4]
+#eval long_div _ _ (s_polynomial _ _ f3 f3) [f1,f2,f3,f4]
+#eval long_div _ _ (s_polynomial _ _ f4 f4) [f1,f2,f3,f4]
+#eval long_div _ _ (s_polynomial _ _ f1 f3) [f1,f2,f3]
+#eval long_div _ _ (s_polynomial _ _ f1 f3) [f1,f2,f3]
+#eval long_div _ _ (s_polynomial _ _ f2 f3) [f1,f2,f3]
+#eval long_div _ _ (s_polynomial _ _ f2 f4) [f1,f2,f3,f4]
+#eval long_div _ _ (s_polynomial _ _ f3 f4) [f1,f2,f3,f4]
+#eval long_div _ _ (0) [f1,f2,f3,f4]
 
 --nil?????????????????
 --must add 0/x = 0
@@ -301,6 +341,10 @@ meta def long_div: my_mvpolynomial _ _ -> list (my_mvpolynomial _ _) -> my_mvpol
 meta def bb_criterion (basis: list (my_mvpolynomial σ α)) : bool := 
   ∀ x ∈ basis, ∀ y ∈ basis, x ≠ y -> (long_div _ _ (s_polynomial α σ x y) (basis) = 0)
 #check bb_criterion α σ [pol]
+#eval bb_criterion _ _ [f1,f2,f3,f4]
+#eval bb_criterion _ _ [f1,f2,f3]
+#eval bb_criterion _ _ [f1,f2,f3,w3]
+#eval bb_criterion _ _ [g1,g2,g3,g4]
 
 --let I a pol ideal ≠ 0. then a gb for I can be constructed in a finite n of steps by the alg:
 --1 input is an I = <f1, ... ,fs>
@@ -316,83 +360,25 @@ meta def bb_criterion (basis: list (my_mvpolynomial σ α)) : bool :=
 -- IF S 	= 0 THEN G := G ∪ {S}
 -- UNTIL G = G
 
--- meta def bb_alg' (my_ideal: list (my_mvpolynomial σ α)) : list(my_mvpolynomial σ α) :=
---   my_ideal.foldl (λ l n, my_ideal.foldl (λ l' m, if long_div α σ (s_polynomial α σ m n) (my_ideal) ≠ 0 
---   then (long_div α σ (s_polynomial α σ m n) (my_ideal)::l') else l') l) my_ideal
+-- def smaller (pp1 pp2: my_mvpolynomial σ α) : bool :=
+--   (((pp1.leading_mon _ _).iget).sort (≥) ≤ ((pp2.leading_mon _ _).iget).sort (≥)) 
 
 --every nonzero ideal I ⊂ k[x1, . . . , xn] has a Groebner basis
-meta def bb_alg (my_ideal: list (my_mvpolynomial σ α)) (h: my_ideal ≠ zero_ideal α σ) : list(my_mvpolynomial σ α) :=
-  my_ideal.foldl (λ l n, my_ideal.foldl (λ l' m, 
-  let remainder := (long_div α σ (s_polynomial α σ m n) (my_ideal)) in 
-  if remainder ≠ 0 then (if remainder ∉ l' then remainder::l' else l') else l') l) my_ideal
-
-#check bb_alg α σ [pol,pol]
-#check bb_alg α σ [pol]
---#check bb_alg' α σ [pol]
-#check @bb_alg
---#check @bb_alg'
-
-
------------------------------------------------ cannot -------------------------------------------------
--- meta example (basis : list (my_mvpolynomial σ α)) : bb_criterion α σ (bb_alg' α σ (basis)) = tt :=
--- begin
---   simp*
--- end
--- lemma bb_is_gb: ∀ basis : list (my_mvpolynomial σ α), bb_criterion α σ (bb_alg' α σ (basis)) = tt :=
--- begin
---     intro basis,
---     cases basis with pol list_pol,
---     unfold bb_criterion
--- end
-
-#check long_div α σ pol [pol,pol]
-#eval nat.div 0 0
-#check finsupp.map_domain
-variables p q : my_mvpolynomial σ α 
-variables pp qq : multiset σ
-variables (as ad af : σ)
-#check p
-#check (1 / (my_mvpolynomial.leading_coef _ _ p))
-#check s_monomial_l _ _ p q
-#check multiset.mon_LCM _ (my_mvpolynomial.leading_mon _ _ p).iget (my_mvpolynomial.leading_mon _ _ q).iget
-#check p * q
-#check s_monomial_l _ _ p q
-#check my_mvpolynomial.l_t _ _ p
-#check pp + qq
-#check pp - qq
-#check p - q
-#check p * q
---#check p / q
-#eval ({1, 1, 1, 2, 2} : multiset ℕ) - {1, 1, 2}
-#check (my_mvpolynomial.leading_coef α σ pol / my_mvpolynomial.leading_coef α σ pol)
-#check finsupp.support p
-#check s_polynomial α σ p q
-#eval ({1, 1, 1, 2} : multiset ℕ) - {1, 1, 2, 5, 6, 9}
-#eval multiset.prod ({1, 1, 5, 2} : multiset ℕ)
-#check multiset.lex pp qq
+--(h: my_ideal ≠ zero_ideal α σ)
+meta def bb_alg: list(my_mvpolynomial σ α) -> list (my_mvpolynomial σ α) 
+| [] := []
+| (h::t) := 
+    ((h::t) : list (my_mvpolynomial σ α)).foldr(λ p l, 
+    (((h::t): list (my_mvpolynomial σ α)).foldr(λ p1 l1, 
+    let remainder := (long_div α σ (s_polynomial α σ p p1) (h::t)) in  
+        if (remainder ≠ 0 ∧ remainder ∉ ((h::t) : list (my_mvpolynomial σ α)))
+        then bb_alg ((h::t) ++ [remainder])
+        else l1)) 
+    (h::t)) 
+    (h::t)
 
 
-def f5 : my_mvpolynomial ℕ ℚ :=
-  finsupp.single {2,4} 100 +  
-  finsupp.single {1, 1, 2} 20
-#eval f5.to_fun {3,2}
-variable (mmm: multiset σ)
-#check finsupp.single mmm (pol.to_fun mmm)
-
-#check (mmm).sort (≤)
-#check (finsupp.support pol).sort multiset.lex
-#check (f5 : my_mvpolynomial ℕ ℚ)
-#check my_mvpolynomial.repr
-#eval my_mvpolynomial.l_t _ _ f5
-#check  my_mvpolynomial.l_t _ _ f5
-#eval f5
-
-def nom: my_mvpolynomial ℕ ℚ :=
-  finsupp.single {1,1,1} 1 -  
-  finsupp.single {1,1} 12 - 42 
-
-def denom: my_mvpolynomial ℕ ℚ :=
-  finsupp.single {1,1} 1 -  
-  finsupp.single {1} 2 + 1
-
-#eval long_div _ _ nom [denom]
+--#check bb_alg _ _ [f1, f2] dec_trivial
+--#eval bb_alg _ _ [f1, f2] dec_trivial
+#eval bb_alg _ _ [f1, f2]
+#eval bb_alg _ _ [g1,g2,g3]
