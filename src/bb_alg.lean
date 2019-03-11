@@ -374,7 +374,7 @@ meta def bb_alg: list(my_mvpolynomial σ α) -> list (my_mvpolynomial σ α)
         if (remainder ≠ 0 ∧ remainder ∉ ((h::t) : list (my_mvpolynomial σ α)))
         then bb_alg ((h::t) ++ [remainder])
         else l1)) 
-    (h::t)) 
+    (l)) 
     (h::t)
 
 
